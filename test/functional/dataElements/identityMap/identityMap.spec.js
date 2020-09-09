@@ -291,3 +291,26 @@ test("double Identity namespace trigger validation error", async () => {
   await identityMapViewController.expectIsNotValid();
   await identities[1].namespace.expectError();
 });
+test("multiple primary identifiers trigger validation error", async () => {
+  await identityMapViewController.init({
+    extensionSettings: mockExtensionSettings,
+    settings: {
+      CUSTOM_IDENTITY: [
+        {
+          id: "123",
+          authenticatedState: "authenticated",
+          primary: true
+        },
+        {
+          id: "12w3",
+          authenticatedState: "authenticated",
+          primary: true
+        }
+      ]
+    }
+  });
+  await accordion.clickHeader("CUSTOM_IDENTITY");
+
+  await identityMapViewController.expectIsNotValid();
+  await identities[0].identifiers[1].primary.expectError();
+});

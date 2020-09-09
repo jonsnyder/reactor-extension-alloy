@@ -74,6 +74,30 @@ const validateDuplicateValue = (
   );
 };
 
+const hasPrimary = identifier => identifier.primary;
+
+const validateOnePrimary = (createError, identities, message) => {
+  let primaries = 0;
+
+  for (let i = 0; i < identities.length; i += 1) {
+    const { identifiers = [] } = identities[i];
+
+    for (let j = 0; j < identifiers.length; j += 1) {
+      if (hasPrimary(identifiers[j])) {
+        primaries += 1;
+      }
+
+      if (primaries > 1) {
+        return createError({
+          path: `identities[${i}].identifiers[${j}].primary`,
+          message
+        });
+      }
+    }
+  }
+  return true;
+};
+
 const validationSchema = object()
   .shape({
     identities: array().of(
@@ -104,19 +128,14 @@ const validationSchema = object()
       "namespace",
       "Please provide a unique namespace."
     );
-  });
-
-/* will work on this as part of identityMap phase 2
- .test("uniquePrimary", function uniquePrimary(settings) {
-    return validateDuplicateValue(
+  })
+  .test("uniquePrimary", function uniquePrimary(settings) {
+    return validateOnePrimary(
       this.createError.bind(this),
       settings.identities,
-      "primary",
-      "Only one namespace can be primary.",
-      true
+      "Only one namespace can be primary."
     );
   });
-*/
 
 const IdentityMap = () => {
   return (
