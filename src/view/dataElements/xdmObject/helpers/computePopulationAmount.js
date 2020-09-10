@@ -14,10 +14,6 @@ import { EMPTY, FULL, PARTIAL, BLANK } from "../constants/populationAmount";
 import { PARTS } from "../constants/populationStrategy";
 import isFormStateValuePopulated from "./isFormStateValuePopulated";
 
-const calculatePopulationAmountForWholePopulationStrategy = wholeValue => {
-  return isFormStateValuePopulated(wholeValue) ? FULL : EMPTY;
-};
-
 const calculatePopulationAmountForPartsPopulationStrategy = childrenTreeNodes => {
   if (childrenTreeNodes && childrenTreeNodes.length) {
     const tally = childrenTreeNodes.reduce(
@@ -52,16 +48,11 @@ export default ({
 }) => {
   const {
     populationStrategy,
-    value,
-    isAutoPopulated,
-    isAlwaysDisabled
+    value
   } = formStateNode;
 
-  if (isAlwaysDisabled || isAncestorUsingWholePopulationStrategy) {
+  if (isAncestorUsingWholePopulationStrategy) {
     return BLANK;
-  }
-  if (isAutoPopulated) {
-    return FULL;
   }
 
   if (populationStrategy === PARTS) {
@@ -70,5 +61,9 @@ export default ({
     );
   }
 
-  return calculatePopulationAmountForWholePopulationStrategy(value);
+  if (isFormStateValuePopulated(value)) {
+    return FULL;
+  }
+
+  return EMPTY;
 };
